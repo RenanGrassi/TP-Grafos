@@ -22,11 +22,67 @@ class Grafo:
                 #Grafo não direcionado
                 self.matriz_adjacencia[v][u] = peso
     
-    def ordem_do_grafo(self):
+    def ordem(self):
         "Número de vértices do grafo"
         return len(self.matriz_adjacencia)
 
-    def tamanho_do_grafo(self):
+    def tamanho(self):
         "Número de arestas do grafo"
-        arestas = sum(1 for i in range(self.ordem_do_grafo()) for j in range(i) if self.matriz_adjacencia[i][j] != 0)
+        arestas = sum(1 for i in range(self.ordem()) for j in range(i) if self.matriz_adjacencia[i][j] != 0)
         return arestas
+    
+    def densidade(self):
+        "Retorna a densidade do grafo"
+        V = self.ordem()
+        A = self.tamanho()
+        if V > 1:
+            return (2 * A) / (V * (V - 1))
+        else:
+            return 0  
+    
+    def vizinhos(self, vertice):
+        "Retorna uma lista dos vizinhos de um vértice fornecido"
+        V = self.ordem()  
+        vertice -= 1  # Ajusta para índice zero
+    
+        if vertice < 0 or vertice >= V:
+            raise ValueError("Vertice fora dos limites")
+
+        vizinhos = [i + 1 for i in range(V) if self.matriz_adjacencia[vertice][i] != 0]
+        return vizinhos
+
+    def grau(self, vertice):
+        "Retorna o grau de um vértice fornecido"
+        
+        V = self.ordem()  
+        vertice -= 1  # Ajusta para índice zero
+        if vertice < 0 or vertice >= V:
+            raise ValueError("Vertice fora dos limites")
+
+        grau = sum(1 for i in range(V) if self.matriz_adjacencia[vertice][i] != 0)
+        return grau
+    
+    # Função busca em profundidade
+    def dfs(self, v, visitado, ignorar):
+        "Função auxiliar DFS(busca em profundidade) que ignora o vértice especificado"
+        visitado[v] = True
+        for i in range(self.ordem()):
+            if i != ignorar and self.matriz_adjacencia[v][i] != 0 and not visitado[i]:
+                self.dfs(i, visitado, ignorar)
+
+    def e_articulacao(self, vertice):
+        "Verifica se o vértice fornecido é uma articulação"
+    
+        vertice -= 1  # Ajusta para índice zero
+        V = self.ordem()
+
+        # Realiza uma DFS sem o vértice para verificar conectividade
+        visitado = [False] * V
+        start = 0 if vertice != 0 else 1  # Ponto inicial diferente do vértice a ser removido
+        self.dfs(start, visitado, vertice)
+
+        # Se há vértices não visitados, o grafo se desconecta ao remover 'vertice'
+        return not all(visitado[i] or i == vertice for i in range(V))
+    
+    
+
