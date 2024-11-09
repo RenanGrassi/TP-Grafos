@@ -7,7 +7,7 @@ class Grafo:
         self.carregar_grafo(caminho_arquivo)
     
     def carregar_grafo(self, caminho_arquivo):
-        "Lê o grafo do txt e armazena na matriz de adjacência"
+   # "Lê o grafo do txt e armazena na matriz de adjacência"
         with open(caminho_arquivo, 'r') as arquivo:
             linhas = arquivo.readlines()
             num_vertices = int(linhas[0].strip())
@@ -41,7 +41,7 @@ class Grafo:
             return 0  
     
     def vizinhos(self, vertice):
-        "Retorna uma lista dos vizinhos de um vértice fornecido"
+       # "Retorna uma lista dos vizinhos de um vértice fornecido"
         V = self.ordem()  
         vertice -= 1  # Ajusta para índice zero
     
@@ -52,7 +52,7 @@ class Grafo:
         return vizinhos
 
     def grau(self, vertice):
-        "Retorna o grau de um vértice fornecido"
+      #  "Retorna o grau de um vértice fornecido"
         
         V = self.ordem()  
         vertice -= 1  # Ajusta para índice zero
@@ -64,14 +64,14 @@ class Grafo:
     
     # Função busca em profundidade
     def dfs(self, v, visitado, ignorar):
-        "Função auxiliar DFS(busca em profundidade) que ignora o vértice especificado"
+      #  "Função auxiliar DFS(busca em profundidade) que ignora o vértice especificado"
         visitado[v] = True
         for i in range(self.ordem()):
             if i != ignorar and self.matriz_adjacencia[v][i] != 0 and not visitado[i]:
                 self.dfs(i, visitado, ignorar)
 
     def e_articulacao(self, vertice):
-        "Verifica se o vértice fornecido é uma articulação"
+       # "Verifica se o vértice fornecido é uma articulação"
     
         vertice -= 1  # Ajusta para índice zero
         V = self.ordem()
@@ -84,5 +84,29 @@ class Grafo:
         # Se há vértices não visitados, o grafo se desconecta ao remover 'vertice'
         return not all(visitado[i] or i == vertice for i in range(V))
     
-    
-
+    def buscaEmLargura(self, v):
+        Q = []
+        marcado = []
+        explorado = {}
+        lista_explorado_nao_arvore = []
+        pai = {}
+        nos = set()
+        nos.add(v)
+        marcado.append(v)
+        Q.append(v)
+        while(len(Q) > 0):
+            v =  Q.pop(0)
+            for w in self.vizinhos(v):
+                if(w not in marcado):
+                    explorado[(v,w)] = True
+                    Q.append(w)
+                    marcado.append(w)
+                    pai[w] = v
+                    nos.add(w)
+                else:
+                    if pai[v] != w:
+                        aresta = (min(v,w), max(v,w))
+                        if aresta not in lista_explorado_nao_arvore:
+                            lista_explorado_nao_arvore.append((v,w))
+        print(nos)
+        print(lista_explorado_nao_arvore)

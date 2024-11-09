@@ -7,6 +7,6 @@ def main():
     print("Ordem do Grafo:", grafo.ordem())
     print("Tamanho do Grafo:", grafo.tamanho())
     print("Densidade do Grafo:", grafo.densidade())
-
+   # grafo.buscaEmLargura(5)
 if __name__ == "__main__":
     main()
