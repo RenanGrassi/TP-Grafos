@@ -86,55 +86,65 @@ class Grafo:
     
     def buscaEmLargura(self, v):
         vertices = list(range(1, len(self.matriz_adjacencia) + 1))
+
+        if v not in vertices:
+            print("Vértice não pertence ao grafo")
+            return
+
         Q = []
         marcado = []
         explorado = {}
         lista_explorado_nao_arvore = []
         pai = {}
-        nos = set()
+        arvores = []
 
-        if v in vertices:
+        if v in vertices and v not in marcado:
+            arvore_atual = set()
             Q.append(v)
             marcado.append(v)
-            nos.add(v)
+            arvore_atual.add(v)
 
-        while(len(Q) > 0):
-            v =  Q.pop(0)
-            for w in self.vizinhos(v):
-                if(w not in marcado):
-                    explorado[(v,w)] = True
-                    Q.append(w)
-                    marcado.append(w)
-                    pai[w] = v
-                    nos.add(w)
-                else:
-                    if pai[v] != w:
-                        aresta = (min(v,w), max(v,w))
-                        if aresta not in lista_explorado_nao_arvore:
-                            lista_explorado_nao_arvore.append((v,w))
+            while len(Q) > 0:
+                vertice_atual = Q.pop(0)
+                for w in self.vizinhos(vertice_atual):
+                    if w not in marcado:
+                        explorado[(vertice_atual, w)] = True
+                        Q.append(w)
+                        marcado.append(w)
+                        pai[w] = vertice_atual
+                        arvore_atual.add(w)
+                    else:
+                        if pai.get(vertice_atual) != w:
+                            aresta = (min(vertice_atual, w), max(vertice_atual, w))
+                            if aresta not in lista_explorado_nao_arvore:
+                                lista_explorado_nao_arvore.append(aresta)
 
-        for vertice in vertices:
+            arvores.append(arvore_atual)
+
+        for vertice in sorted(vertices):
             if vertice not in marcado:
+                arvore_atual = set()
                 Q.append(vertice)
                 marcado.append(vertice)
-                nos.add(vertice)
+                arvore_atual.add(vertice)
+
                 while len(Q) > 0:
-                    v = Q.pop(0)
-                    for w in self.vizinhos(v):
-                        print('w = ', w)
-                        if(w not in marcado):
-                            explorado[(v,w)] = True
+                    vertice_atual = Q.pop(0)
+                    for w in self.vizinhos(vertice_atual):
+                        if w not in marcado:
+                            explorado[(vertice_atual, w)] = True
                             Q.append(w)
                             marcado.append(w)
-                            pai[w] = v
-                            nos.add(w)
+                            pai[w] = vertice_atual
+                            arvore_atual.add(w)
                         else:
-                            if pai[v] != w:
-                                aresta = (min(v,w), max(v,w))
-                                #print('arestas = ', aresta)
+                            if pai.get(vertice_atual) != w:
+                                aresta = (min(vertice_atual, w), max(vertice_atual, w))
                                 if aresta not in lista_explorado_nao_arvore:
-                                    lista_explorado_nao_arvore.append((v,w))
+                                    lista_explorado_nao_arvore.append(aresta)
 
-        print(nos)
-        print(lista_explorado_nao_arvore)
-        #Dividir entre árvore principal e árvore da floresta
+                arvores.append(arvore_atual)
+
+        for i, arvore in enumerate(arvores, start=1):
+            print(f"Árvore de busca em largura {i}: {sorted(arvore)}")
+        print("Arestas não-árvore:", lista_explorado_nao_arvore)
