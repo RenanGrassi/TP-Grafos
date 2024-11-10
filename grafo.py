@@ -85,15 +85,19 @@ class Grafo:
         return not all(visitado[i] or i == vertice for i in range(V))
     
     def buscaEmLargura(self, v):
+        vertices = list(range(1, len(self.matriz_adjacencia) + 1))
         Q = []
         marcado = []
         explorado = {}
         lista_explorado_nao_arvore = []
         pai = {}
         nos = set()
-        nos.add(v)
-        marcado.append(v)
-        Q.append(v)
+
+        if v in vertices:
+            Q.append(v)
+            marcado.append(v)
+            nos.add(v)
+
         while(len(Q) > 0):
             v =  Q.pop(0)
             for w in self.vizinhos(v):
@@ -108,5 +112,29 @@ class Grafo:
                         aresta = (min(v,w), max(v,w))
                         if aresta not in lista_explorado_nao_arvore:
                             lista_explorado_nao_arvore.append((v,w))
+
+        for vertice in vertices:
+            if vertice not in marcado:
+                Q.append(vertice)
+                marcado.append(vertice)
+                nos.add(vertice)
+                while len(Q) > 0:
+                    v = Q.pop(0)
+                    for w in self.vizinhos(v):
+                        print('w = ', w)
+                        if(w not in marcado):
+                            explorado[(v,w)] = True
+                            Q.append(w)
+                            marcado.append(w)
+                            pai[w] = v
+                            nos.add(w)
+                        else:
+                            if pai[v] != w:
+                                aresta = (min(v,w), max(v,w))
+                                #print('arestas = ', aresta)
+                                if aresta not in lista_explorado_nao_arvore:
+                                    lista_explorado_nao_arvore.append((v,w))
+
         print(nos)
         print(lista_explorado_nao_arvore)
+        #Dividir entre árvore principal e árvore da floresta
