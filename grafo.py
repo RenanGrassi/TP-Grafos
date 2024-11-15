@@ -1,8 +1,3 @@
-# grafo.py
-
-from os import remove
-
-
 class Grafo:
     def __init__(self, caminho_arquivo):
         "Inicializa e lê arquivo .txt"
@@ -94,6 +89,7 @@ class Grafo:
             print("Vértice não pertence ao grafo")
             return
 
+        #Define as estruturas que determinam o funcionamento do algoritmo
         Q = []
         marcado = []
         explorado = {}
@@ -102,14 +98,17 @@ class Grafo:
         arvores = []
 
         if v in vertices and v not in marcado:
+            #Inicia busca a partir do nó passado por parâmetro e inicializa fila Q
             arvore_atual = set()
             Q.append(v)
             marcado.append(v)
             arvore_atual.add(v)
 
             while len(Q) > 0:
+                #Remove elemento de Q e trabalha sobre este
                 vertice_atual = Q.pop(0)
                 for w in self.vizinhos(vertice_atual):
+                    #Nós pertencentes a árvore de busca
                     if w not in marcado:
                         explorado[(vertice_atual, w)] = True
                         Q.append(w)
@@ -117,13 +116,14 @@ class Grafo:
                         pai[w] = vertice_atual
                         arvore_atual.add(w)
                     else:
+                        #Nós fora da árvore de busca principal
                         if pai.get(vertice_atual) != w:
                             aresta = (min(vertice_atual, w), max(vertice_atual, w))
                             if aresta not in lista_explorado_nao_arvore:
                                 lista_explorado_nao_arvore.append(aresta)
 
             arvores.append(arvore_atual)
-
+        #Algoritmo para busca em largura de grafos desconexos
         for vertice in sorted(vertices):
             if vertice not in marcado:
                 arvore_atual = set()
@@ -153,12 +153,15 @@ class Grafo:
         print("Arestas não-árvore:", lista_explorado_nao_arvore)
 
     def verifica_ciclo(self):
+        #Só pode ser ciclo se a ordem do grafo for superior a 2
         if self.ordem() > 2:
             matriz = self.matriz_adjacencia
             no = 0
             conta_aresta = 0
             candidato_ciclo = set()
-
+            
+            #Só é possível ser ciclo se o grau de cada vértice do ciclo for no mínimo 2
+            #Mas, apenas isso não define um ciclo
             for vertice in matriz:
                 no+=1
                 if self.grau(no) >= 2:
@@ -169,6 +172,7 @@ class Grafo:
                             candidato_ciclo.add(no)
                     conta_aresta = 0
            
+            #Separa para análise os nós que podem estar em um ciclo
             nos_ciclo = [[] for _ in range(len(matriz[0]))]
             remove_nos = []
             for contador, k in enumerate(nos_ciclo):
@@ -176,10 +180,11 @@ class Grafo:
                     remove_nos.append(contador)
             nos_ciclo = [sub for i, sub in enumerate(nos_ciclo) if i not in remove_nos]
             
+            #Confere quantas vezes cada vértice aparece no grafo
+            #Se os vértices não aparecem ao menos 2 vezes, não há ciclo
             for linha in matriz:
                 for j in range(len(nos_ciclo)):
                     nos_ciclo[j].append(linha[j])
-            print(nos_ciclo)
             difente0 = {i:0 for i in range(len(nos_ciclo))}
             for i in range(len(nos_ciclo)):
                 if i+1 in candidato_ciclo:
@@ -197,3 +202,34 @@ class Grafo:
         else:
             print("Não há ciclos no grafo")
             return False
+    
+    def componentesConexas(self):
+        #Confere a quantidade de nós e prepara para criar busca em profundidade e armazenamento dos nós das componentes
+        n = self.ordem()
+        visitados = [False]*n
+        componentesConexas = []
+        
+        #Se nó foi visitado, adiciona o nó a uma componente
+        #Itera sobre todos os nós do grafo e realiza a busca em profundidade para adicionar os nós às suas respectivas componenentes
+        #Ao final as componentes são adicionadas a uma lista que guarda todas as componentes produzidas
+        def buscaEmProfundidadeAdaptada(v, no_componente):
+            visitados[v] = True
+            no_componente.append(v)
+            for i in range(n):
+                if self.matriz_adjacencia[v][i] != 0 and visitados[i] == False:
+                    buscaEmProfundidadeAdaptada(i, no_componente)
+        
+        for v in range(n):
+            if(not visitados[v]):
+                no_componente = []
+                buscaEmProfundidadeAdaptada(v, no_componente)
+                componentesConexas.append(no_componente)
+
+        qtdComponentes = len(componentesConexas)
+        
+        saidaQtdComponentes = f'{qtdComponentes} componente conexa' if qtdComponentes == 1 else f'{qtdComponentes} componentes conexas'
+        print(saidaQtdComponentes)
+        for i in range(len(componentesConexas)):
+            print(componentesConexas[i])
+
+

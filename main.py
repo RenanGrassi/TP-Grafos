@@ -9,7 +9,8 @@ def main():
     print("Tamanho do Grafo:", grafo.tamanho())
     print("Densidade do Grafo:", grafo.densidade())
     grafo.buscaEmLargura(2)
-    print(grafo.verifica_ciclo())
+    tem_ciclo = grafo.verifica_ciclo()
+    grafo.componentesConexas()
 
 if __name__ == "__main__":
     main()
