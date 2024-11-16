@@ -1,6 +1,7 @@
 # grafo.py
 
 from os import remove
+import numpy as np
 
 
 class Grafo:
@@ -197,3 +198,75 @@ class Grafo:
         else:
             print("Não há ciclos no grafo")
             return False
+    
+    def caminho_minimo_E_distancia(self, vInicial):
+        infinito = float('inf')
+        vInicial_ = vInicial - 1
+        dt = [infinito] * len(self.matriz_adjacencia)
+        rot = [infinito] * len(self.matriz_adjacencia)  
+        dt[vInicial_] = 0
+        rot[vInicial_] = infinito
+
+        num_vertices = len(self.matriz_adjacencia)
+                    
+        i = vInicial_ + 1 if vInicial_ < len(self.matriz_adjacencia) - 1 else 0
+        
+        while(i != vInicial_):
+            if self.matriz_adjacencia[vInicial_][i] != 0:
+                rot[i] = vInicial_
+                dt[i] = self.matriz_adjacencia[vInicial_][i]
+            
+            else:
+                rot[i] = 0
+                dt[i] = infinito
+            
+            i = i + 1 if i < len(self.matriz_adjacencia) - 1 else 0
+
+        for k in range(vInicial_, len(self.matriz_adjacencia)):
+            altera = False
+            i = vInicial_ + 1 if vInicial_ < len(self.matriz_adjacencia) - 1 else 0
+            while(i != vInicial_):
+                vizinhosV = self.vizinhos(i+1)
+                for vizinho in vizinhosV:
+                    if dt[i] > dt[vizinho-1] + self.matriz_adjacencia[vizinho-1][i]:
+                        dt[i] =  dt[vizinho-1] + self.matriz_adjacencia[vizinho-1][i]
+                        rot[i] = vizinho-1
+                        altera = True
+                i = i + 1 if i < len(self.matriz_adjacencia) - 1 else 0   
+            if altera == False:
+                k = len(self.matriz_adjacencia) 
+    
+        # Verifica se exsite um ciclo de peso negativo no grafo. Se sim, não é possível encontrar o caminho mínimo.
+        for u in range(num_vertices):
+            for v in range(num_vertices):
+                if self.matriz_adjacencia[u][v] != 0:
+                    peso = self.matriz_adjacencia[u][v]
+                    if dt[u] != infinito and dt[u] + peso < dt[v]:
+                       return "O grafo contém um ciclo de peso negativo."
+                        
+            
+        for i in range(len(rot)):
+                rot[i] = rot[i] + 1
+        
+
+        print("A distância do vértice " + str(vInicial) + " para o vértice:")
+        for i in range(num_vertices): 
+            print(str(i+1) + ": " + str(dt[i]))
+        print()
+        print("O caminho mínimo de " + str(vInicial) + " para o vértice:")
+        
+        for i in range(num_vertices):
+            caminho = []
+            caminho.append(i+1) # adiciona o vertice de destino
+            
+            if(rot[i] != infinito):
+                while(caminho[0] != vInicial):  # adiciona o restante dos vertices no caminho
+                    caminho.insert(0, rot[int(caminho[0]) - 1])
+            
+                print(str(i+1) + ": " + str(caminho))
+
+            else:
+                print(str(i+1) + ": infinito")
+
+        print()
+    
