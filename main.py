@@ -9,7 +9,8 @@ def main():
     print("Tamanho do Grafo:", grafo.tamanho())
     print("Densidade do Grafo:", grafo.densidade())
     grafo.buscaEmLargura(2)
-    print(grafo.verifica_ciclo())
+    tem_ciclo = grafo.verifica_ciclo()
+    grafo.componentesConexas()
 
    
     grafo.caminho_minimo_E_distancia(5) # O parâmentro será o vértice inicial
