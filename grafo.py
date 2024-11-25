@@ -6,7 +6,7 @@ import numpy as np
 
 class Grafo:
     def __init__(self, caminho_arquivo):
-        "Inicializa e lê arquivo .txt"
+        # "Inicializa e lê arquivo .txt"
         self.matriz_adjacencia = []
         self.carregar_grafo(caminho_arquivo)
 
@@ -27,16 +27,16 @@ class Grafo:
                 self.matriz_adjacencia[v][u] = peso
 
     def ordem(self):
-        "Número de vértices do grafo"
+        # "Número de vértices do grafo"
         return len(self.matriz_adjacencia)
 
     def tamanho(self):
-        "Número de arestas do grafo"
+        # "Número de arestas do grafo"
         arestas = sum(1 for i in range(self.ordem()) for j in range(i) if self.matriz_adjacencia[i][j] != 0)
         return arestas
 
     def densidade(self):
-        "Retorna a densidade do grafo"
+        # "Retorna a densidade do grafo"
         V = self.ordem()
         A = self.tamanho()
         if V > 1:
@@ -153,11 +153,40 @@ class Grafo:
                                     lista_explorado_nao_arvore.append(aresta)
 
                 arvores.append(arvore_atual)
-
+        
         for i, arvore in enumerate(arvores, start=1):
             print(f"Árvore de busca em largura {i}: {sorted(arvore)}")
         print("Arestas não-árvore:", lista_explorado_nao_arvore)
 
+    def componentesConexas(self):
+        #Confere a quantidade de nós e prepara para criar busca em profundidade e armazenamento dos nós das componentes
+        n = self.ordem()
+        visitados = [False]*n
+        componentesConexas = []
+        
+        #Se nó foi visitado, adiciona o nó a uma componente
+        #Itera sobre todos os nós do grafo e realiza a busca em profundidade para adicionar os nós às suas respectivas componenentes
+        #Ao final as componentes são adicionadas a uma lista que guarda todas as componentes produzidas
+        def buscaEmProfundidadeAdaptada(v, no_componente):
+            visitados[v] = True
+            no_componente.append(v)
+            for i in range(n):
+                if self.matriz_adjacencia[v][i] != 0 and visitados[i] == False:
+                    buscaEmProfundidadeAdaptada(i, no_componente)
+        
+        for v in range(n):
+            if(not visitados[v]):
+                no_componente = []
+                buscaEmProfundidadeAdaptada(v, no_componente)
+                componentesConexas.append(no_componente)
+
+        qtdComponentes = len(componentesConexas)
+        
+        saidaQtdComponentes = f'\n{qtdComponentes} componente conexa' if qtdComponentes == 1 else f'\n{qtdComponentes} componentes conexas'
+        print(saidaQtdComponentes)
+        for i in range(len(componentesConexas)):
+            print(componentesConexas[i])
+    
     def verifica_ciclo(self):
         #Só pode ser ciclo se a ordem do grafo for superior a 2
         if self.ordem() > 2:
@@ -201,111 +230,62 @@ class Grafo:
                     del difente0[k]
             
             todos_maiores_que_dois = all(valor >= 2 for valor in difente0.values())
-            ciclo = "Há ciclo no grafo" if(todos_maiores_que_dois) else "Não há ciclos no grafo"
+            ciclo = "\nHá ciclo no grafo" if(todos_maiores_que_dois) else "\nNão há ciclos no grafo"
             print(ciclo)
             return todos_maiores_que_dois
 
         else:
-            print("Não há ciclos no grafo")
+            print("\nNão há ciclos no grafo")
             return False
     
     def caminho_minimo_E_distancia(self, vInicial):
         infinito = float('inf')
         vInicial_ = vInicial - 1
-        dt = [infinito] * len(self.matriz_adjacencia)
-        rot = [infinito] * len(self.matriz_adjacencia)  
-        dt[vInicial_] = 0
-        rot[vInicial_] = infinito
-
         num_vertices = len(self.matriz_adjacencia)
-                    
-        i = vInicial_ + 1 if vInicial_ < len(self.matriz_adjacencia) - 1 else 0
-        
-        while(i != vInicial_):
-            if self.matriz_adjacencia[vInicial_][i] != 0:
-                rot[i] = vInicial_
-                dt[i] = self.matriz_adjacencia[vInicial_][i]
-            
-            else:
-                rot[i] = 0
-                dt[i] = infinito
-            
-            i = i + 1 if i < len(self.matriz_adjacencia) - 1 else 0
 
-        for k in range(vInicial_, len(self.matriz_adjacencia)):
-            altera = False
-            i = vInicial_ + 1 if vInicial_ < len(self.matriz_adjacencia) - 1 else 0
-            while(i != vInicial_):
-                vizinhosV = self.vizinhos(i+1)
-                for vizinho in vizinhosV:
-                    if dt[i] > dt[vizinho-1] + self.matriz_adjacencia[vizinho-1][i]:
-                        dt[i] =  dt[vizinho-1] + self.matriz_adjacencia[vizinho-1][i]
-                        rot[i] = vizinho-1
-                        altera = True
-                i = i + 1 if i < len(self.matriz_adjacencia) - 1 else 0   
-            if altera == False:
-                k = len(self.matriz_adjacencia) 
-    
-        # Verifica se exsite um ciclo de peso negativo no grafo. Se sim, não é possível encontrar o caminho mínimo.
+        # Inicialização
+        dt = [infinito] * num_vertices  # Distâncias mínimas
+        rot = [None] * num_vertices     # Predecessores
+        dt[vInicial_] = 0               # Distância inicial é 0
+
+        # Relaxamento das arestas (|V| - 1 vezes)
+        for _ in range(num_vertices - 1):
+            for u in range(num_vertices):
+                for v in range(num_vertices):
+                    if self.matriz_adjacencia[u][v] != 0:
+                        peso = self.matriz_adjacencia[u][v]
+                        if dt[u] + peso < dt[v]:
+                            dt[v] = dt[u] + peso
+                            rot[v] = u
+
+        # Verificar ciclos negativos
         for u in range(num_vertices):
             for v in range(num_vertices):
                 if self.matriz_adjacencia[u][v] != 0:
                     peso = self.matriz_adjacencia[u][v]
-                    if dt[u] != infinito and dt[u] + peso < dt[v]:
-                       return "O grafo contém um ciclo de peso negativo."
-                        
-            
-        for i in range(len(rot)):
-                rot[i] = rot[i] + 1
-        
+                    if dt[u] + peso < dt[v]:
+                        return "O grafo contém um ciclo de peso negativo."
 
-        print("A distância do vértice " + str(vInicial) + " para o vértice:")
-        for i in range(num_vertices): 
-            print(str(i+1) + ": " + str(dt[i]))
-        print()
-        print("O caminho mínimo de " + str(vInicial) + " para o vértice:")
-        
+        # Exibir distâncias
+        print(f"Distâncias mínimas a partir do vértice {vInicial}:")
         for i in range(num_vertices):
-            caminho = []
-            caminho.append(i+1) # adiciona o vertice de destino
-            
-            if(rot[i] != infinito):
-                while(caminho[0] != vInicial):  # adiciona o restante dos vertices no caminho
-                    caminho.insert(0, rot[int(caminho[0]) - 1])
-            
-                print(str(i+1) + ": " + str(caminho))
+            print(f"Vértice {i + 1}: {dt[i]}")
 
+        # Reconstruir caminhos mínimos
+        caminhos = {}
+        print("\nCaminhos mínimos:")
+        for i in range(num_vertices):
+            if dt[i] < infinito:
+                caminho = []
+                atual = i
+                while atual is not None:
+                    caminho.insert(0, atual + 1)
+                    atual = rot[atual]
+                print(f"Vértice {i + 1}: {caminho}")
+                caminhos[i + 1] = caminho
             else:
-                print(str(i+1) + ": infinito")
+                print(f"Vértice {i + 1}: Infinito")
+                caminhos[i + 1] = None
 
-        print()
-    
-    def componentesConexas(self):
-        #Confere a quantidade de nós e prepara para criar busca em profundidade e armazenamento dos nós das componentes
-        n = self.ordem()
-        visitados = [False]*n
-        componentesConexas = []
-        
-        #Se nó foi visitado, adiciona o nó a uma componente
-        #Itera sobre todos os nós do grafo e realiza a busca em profundidade para adicionar os nós às suas respectivas componenentes
-        #Ao final as componentes são adicionadas a uma lista que guarda todas as componentes produzidas
-        def buscaEmProfundidadeAdaptada(v, no_componente):
-            visitados[v] = True
-            no_componente.append(v)
-            for i in range(n):
-                if self.matriz_adjacencia[v][i] != 0 and visitados[i] == False:
-                    buscaEmProfundidadeAdaptada(i, no_componente)
-        
-        for v in range(n):
-            if(not visitados[v]):
-                no_componente = []
-                buscaEmProfundidadeAdaptada(v, no_componente)
-                componentesConexas.append(no_componente)
-
-        qtdComponentes = len(componentesConexas)
-        
-        saidaQtdComponentes = f'{qtdComponentes} componente conexa' if qtdComponentes == 1 else f'{qtdComponentes} componentes conexas'
-        print(saidaQtdComponentes)
-        for i in range(len(componentesConexas)):
-            print(componentesConexas[i])
-
+        # Retornar as distâncias e os caminhos mínimos
+        return dt, caminhos

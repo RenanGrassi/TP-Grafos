@@ -1,19 +1,27 @@
 from grafo import Grafo
 
 def main():
-    #Arquivo grafo.txt já tem que estar criado!
-    ##grafo = Grafo("grafo2.txt")
-    grafo = Grafo("grafo3.txt")
+    grafo = Grafo("grafo2.txt")
     
-    print("Ordem do Grafo:", grafo.ordem())
-    print("Tamanho do Grafo:", grafo.tamanho())
-    print("Densidade do Grafo:", grafo.densidade())
-    grafo.buscaEmLargura(2)
-    tem_ciclo = grafo.verifica_ciclo()
-    grafo.componentesConexas()
+    print("\nOrdem do Grafo:", grafo.ordem())
 
-   
-    grafo.caminho_minimo_E_distancia(5) # O parâmentro será o vértice inicial
+    print("\nTamanho do Grafo:", grafo.tamanho())
+
+    print(f"\nDensidade do Grafo: {grafo.densidade():.2f}")
+
+    print("\nVizinhos do vértice 5:", grafo.vizinhos(5))
+
+    print("\nGrau do vértice 5:", grafo.grau(5))
+
+    print("\nVértice 5 do grafo é articulação:", grafo.e_articulacao(5))
+
+    grafo.buscaEmLargura(2)
+    
+    grafo.componentesConexas()
+    
+    tem_ciclo = grafo.verifica_ciclo()
+
+    print(f"\n{grafo.caminho_minimo_E_distancia(3)}\n") # O parâmetro será o vértice inicial
     
 
 if __name__ == "__main__":
