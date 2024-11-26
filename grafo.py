@@ -169,7 +169,7 @@ class Grafo:
         #Ao final as componentes são adicionadas a uma lista que guarda todas as componentes produzidas
         def buscaEmProfundidadeAdaptada(v, no_componente):
             visitados[v] = True
-            no_componente.append(v)
+            no_componente.append(v+1)
             for i in range(n):
                 if self.matriz_adjacencia[v][i] != 0 and visitados[i] == False:
                     buscaEmProfundidadeAdaptada(i, no_componente)
