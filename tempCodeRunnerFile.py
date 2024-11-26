@@ -1,1 +1,0 @@
-    grafo = Grafo("grafo.txt")
