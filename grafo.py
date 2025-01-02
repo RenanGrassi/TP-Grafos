@@ -13,6 +13,7 @@ class Grafo:
     def __init__(self, caminho_arquivo):
         # "Inicializa e lê arquivo .txt"
         self.matriz_adjacencia = []
+        self.vertices = set()  
         self.carregar_grafo(caminho_arquivo)
 
     def carregar_grafo(self, caminho_arquivo):
@@ -26,6 +27,8 @@ class Grafo:
                 u, v, peso = linha.split()
                 #Ajusta índice zero
                 u, v = int(u) - 1, int(v) - 1  
+                self.vertices.add(u)
+                self.vertices.add(v)
                 peso = float(peso)
                 self.matriz_adjacencia[u][v] = peso
                 #Grafo não direcionado
@@ -299,4 +302,34 @@ class Grafo:
     #           Parte 2 - TP
     # ======================================
 
+    def encontrar_maior_conjunto_independente(self):
+        conjunto_independente = set()
+        visitado = set()
+
+        # Adiciona vértices ao conjunto independente
+        for v in self.vertices:
+            if v not in visitado:
+                conjunto_independente.add(v)
+                visitado.add(v)
+                # Marca os vizinhos de 'v' como visitados
+                for u in range(len(self.matriz_adjacencia)):
+                    if self.matriz_adjacencia[v][u] > 0:  # Verifica se há uma aresta entre v e u
+                        visitado.add(u)
+
+        return conjunto_independente
     
+    def complemento(self, conjunto):
+        # Calcula o complemento do conjunto de vértices 
+        return self.vertices - conjunto
+
+    def cobertura_minima(self):
+        # Passo 1: Encontra o maior conjunto independente (heurística gulosa)
+        maior_conjunto_independente = self.encontrar_maior_conjunto_independente()
+        
+        # Passo 2: Complementa o conjunto independente para encontrar a cobertura mínima
+        cobertura = self.complemento(maior_conjunto_independente)
+        
+        return cobertura
+
+
+
