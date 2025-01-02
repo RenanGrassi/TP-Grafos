@@ -1,7 +1,7 @@
 from grafo import Grafo
 
 def main():
-    grafo = Grafo("grafo2.txt")
+    grafo = Grafo("grafos/grafo2.txt")
     
     print("\nOrdem do Grafo:", grafo.ordem())
 
