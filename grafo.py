@@ -5,6 +5,11 @@ import numpy as np
 
 
 class Grafo:
+
+    # ======================================
+    #           Parte 1 - TP
+    # ======================================
+
     def __init__(self, caminho_arquivo):
         # "Inicializa e lê arquivo .txt"
         self.matriz_adjacencia = []
@@ -289,3 +294,9 @@ class Grafo:
 
         # Retornar as distâncias e os caminhos mínimos
         return dt, caminhos
+
+    # ======================================
+    #           Parte 2 - TP
+    # ======================================
+
+    
