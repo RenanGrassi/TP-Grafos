@@ -13,6 +13,7 @@ class Grafo:
     def __init__(self, caminho_arquivo):
         # "Inicializa e lê arquivo .txt"
         self.matriz_adjacencia = []
+        self.vertices = set()  
         self.carregar_grafo(caminho_arquivo)
 
     def carregar_grafo(self, caminho_arquivo):
@@ -26,6 +27,8 @@ class Grafo:
                 u, v, peso = linha.split()
                 #Ajusta índice zero
                 u, v = int(u) - 1, int(v) - 1  
+                self.vertices.add(u)
+                self.vertices.add(v)
                 peso = float(peso)
                 self.matriz_adjacencia[u][v] = peso
                 #Grafo não direcionado
@@ -272,13 +275,13 @@ class Grafo:
                         return "O grafo contém um ciclo de peso negativo."
 
         # Exibir distâncias
-        print(f"Distâncias mínimas a partir do vértice {vInicial}:")
-        for i in range(num_vertices):
-            print(f"Vértice {i + 1}: {dt[i]}")
+        # print(f"Distâncias mínimas a partir do vértice {vInicial}:")
+        # for i in range(num_vertices):
+        #     print(f"Vértice {i + 1}: {dt[i]}")
 
         # Reconstruir caminhos mínimos
         caminhos = {}
-        print("\nCaminhos mínimos:")
+        # print("\nCaminhos mínimos:")
         for i in range(num_vertices):
             if dt[i] < infinito:
                 caminho = []
@@ -286,10 +289,10 @@ class Grafo:
                 while atual is not None:
                     caminho.insert(0, atual + 1)
                     atual = rot[atual]
-                print(f"Vértice {i + 1}: {caminho}")
+                # print(f"Vértice {i + 1}: {caminho}")
                 caminhos[i + 1] = caminho
             else:
-                print(f"Vértice {i + 1}: Infinito")
+                # print(f"Vértice {i + 1}: Infinito")
                 caminhos[i + 1] = None
 
         # Retornar as distâncias e os caminhos mínimos
@@ -299,4 +302,84 @@ class Grafo:
     #           Parte 2 - TP
     # ======================================
 
+    def encontrar_maior_conjunto_independente(self):
+        conjunto_independente = set()
+        visitado = set()
+
+        # Adiciona vértices ao conjunto independente
+        for v in self.vertices:
+            if v not in visitado:
+                conjunto_independente.add(v)
+                visitado.add(v)
+                # Marca os vizinhos de 'v' como visitados
+                for u in range(len(self.matriz_adjacencia)):
+                    if self.matriz_adjacencia[v][u] > 0:  # Verifica se há uma aresta entre v e u
+                        visitado.add(u)
+
+        return conjunto_independente
     
+    def complemento(self, conjunto):
+        # Calcula o complemento do conjunto de vértices 
+        return self.vertices - conjunto
+
+    def cobertura_minima(self):
+        # Passo 1: Encontra o maior conjunto independente (heurística gulosa)
+        maior_conjunto_independente = self.encontrar_maior_conjunto_independente()
+        
+        # Passo 2: Complementa o conjunto independente para encontrar a cobertura mínima
+        cobertura = self.complemento(maior_conjunto_independente)
+        
+        return cobertura
+    def emparelhamento_maximo(self):
+        marcados = set() # Vértices marcados
+        emparelhamento = [] # Lista de pares de emparelhamento
+        correspondencia = [-1] * self.ordem()  # Armazenar o emparelhamento de cada vértice. -1 significa não emparelhado
+
+        def encontrar_caminho_aumentante(v, visitados):
+            # Tenta encontrar um caminho aumentante a partir de um vértice. 
+            # Retorna True se um caminho aumentante foi encontrado
+            for i in self.vizinhos(v + 1):
+                i -= 1  # Ajusta para índice zero
+                if i not in visitados:
+                    visitados.add(i) # Marca o vértice como visitado
+                    if correspondencia[i] == -1 or encontrar_caminho_aumentante(correspondencia[i], visitados): # Se i não está emparelhado ou se o vértice emparelhado com i tem um caminho aumentante
+                        correspondencia[i] = v # Emparelha i com v
+                        correspondencia[v] = i # Emparelha v com i
+                        return True
+            return False
+
+        for v in range(self.ordem()):
+            if correspondencia[v] == -1:  # Se v não está emparelhado
+                visitados = set() 
+                encontrar_caminho_aumentante(v, visitados)
+        
+        emparelhamento = []
+        for i in range(self.ordem()):
+            if correspondencia[i] != -1 and i < correspondencia[i]:
+                emparelhamento.append((i + 1, correspondencia[i] + 1))
+
+        # Garante que nenhum vértice seja emparelhado mais de uma vez
+        emparelhamento_validado = []
+        vertices_utilizados = set()
+        for u, v in emparelhamento:
+            if u not in vertices_utilizados and v not in vertices_utilizados:
+                emparelhamento_validado.append((u, v))
+                vertices_utilizados.add(u)
+                vertices_utilizados.add(v)
+
+        return emparelhamento_validado
+    
+    def centralidade_de_proximidade(self, vertice):
+        num_vertices = self.ordem()
+        soma_distancias = 0
+        distancias, _ = self.caminho_minimo_E_distancia(vertice)      
+        
+        for i in distancias:
+            if isinstance(i, (int, float)) and i != float('inf'):  # Ignora infinito para vértices inacessíveis
+                soma_distancias += i            
+
+        if soma_distancias > 0:
+            centralidade = (num_vertices - 1) / soma_distancias
+        else:
+            centralidade = 0
+        return centralidade
