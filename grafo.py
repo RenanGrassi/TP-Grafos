@@ -275,13 +275,13 @@ class Grafo:
                         return "O grafo contém um ciclo de peso negativo."
 
         # Exibir distâncias
-        print(f"Distâncias mínimas a partir do vértice {vInicial}:")
-        for i in range(num_vertices):
-            print(f"Vértice {i + 1}: {dt[i]}")
+        # print(f"Distâncias mínimas a partir do vértice {vInicial}:")
+        # for i in range(num_vertices):
+        #     print(f"Vértice {i + 1}: {dt[i]}")
 
         # Reconstruir caminhos mínimos
         caminhos = {}
-        print("\nCaminhos mínimos:")
+        # print("\nCaminhos mínimos:")
         for i in range(num_vertices):
             if dt[i] < infinito:
                 caminho = []
@@ -289,10 +289,10 @@ class Grafo:
                 while atual is not None:
                     caminho.insert(0, atual + 1)
                     atual = rot[atual]
-                print(f"Vértice {i + 1}: {caminho}")
+                # print(f"Vértice {i + 1}: {caminho}")
                 caminhos[i + 1] = caminho
             else:
-                print(f"Vértice {i + 1}: Infinito")
+                # print(f"Vértice {i + 1}: Infinito")
                 caminhos[i + 1] = None
 
         # Retornar as distâncias e os caminhos mínimos
@@ -368,3 +368,18 @@ class Grafo:
                 vertices_utilizados.add(v)
 
         return emparelhamento_validado
+    
+    def centralidade_de_proximidade(self, vertice):
+        num_vertices = self.ordem()
+        soma_distancias = 0
+        distancias, _ = self.caminho_minimo_E_distancia(vertice)      
+        
+        for i in distancias:
+            if isinstance(i, (int, float)) and i != float('inf'):  # Ignora infinito para vértices inacessíveis
+                soma_distancias += i            
+
+        if soma_distancias > 0:
+            centralidade = (num_vertices - 1) / soma_distancias
+        else:
+            centralidade = 0
+        return centralidade
