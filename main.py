@@ -3,7 +3,7 @@ from grafo import Grafo
 def main():
     #Arquivo grafo.txt já tem que estar criado!
     # grafo = Grafo("grafos/grafo2.txt")
-    grafo = Grafo("grafos/grafo8.txt")
+    grafo = Grafo("grafos/grafo10.txt")
     
     # print("Ordem do Grafo:", grafo.ordem())
     # print("Tamanho do Grafo:", grafo.tamanho())
@@ -18,7 +18,7 @@ def main():
     cobertura = grafo.cobertura_minima()
     # print("Cobertura mínima de vértices:", cobertura)
     print("emparelhamento máximo: ", grafo.emparelhamento_maximo())
-    
+    print("Centralidade de proximidade: ", grafo.centralidade_de_proximidade(5))
 
 if __name__ == "__main__":
     main()
